@@ -1,8 +1,12 @@
 from itertools import permutations
 
+'''
+	Script with functions and classes for reading and writing treebank files
+'''
+
 class Token:
 	
-	def __init__(self):
+	def __init__(self):		# Read all elements of tokens in data
 		self.id = None
 		self.form = None
 		self.lemma = None
@@ -14,7 +18,7 @@ class Token:
 		self.x = None
 		self.y = None
 
-class Sentence:
+class Sentence:		# Add all tokens as a list
 	
 	def __init__(self, token_items):        
 		# create ROOT token
@@ -39,73 +43,71 @@ class Sentence:
 				
 	def potential_arcs(self):
 		'''
-			arc_list = list of (head_int, token(dependency)_int) tuples
+			Helper function to get all potential arcs of the sentence.
 		'''
-		#arc_list = list(permutations(self.tokens[1:], 2))
+		# All possible permutations of tokens except for ROOT
 		arc_list = [(arc[0].id, arc[1].id) for arc in list(permutations(self.tokens[1:], 2))]
 		for token in self.tokens[1:]:
-			arc_list.append((self.tokens[0].id, token.id))
-		return set(arc_list)
+			arc_list.append((self.tokens[0].id, token.id))		# Add ROOT arcs separately; only right-arc possible
+		return set(arc_list)		# May be unnecessary, but no duplicate arcs
 		
 	def gold_arcs(self):
 		'''
-			arc_list = dictionary (key=dependent, val=head)
+			Helper function to get the gold arcs of the sentence directly from Token items.
 		'''
-		arc_list = {}
+		arc_list = {}		# Dictionary of arcs; dependants are unique and therefore used as keys
 		for token in self.tokens[1:]:
-			#if token.form == "ROOT":
-				#continue
-			#else:
 			head = token.head; dep = token.id
 			arc_list[dep] = head
 		return arc_list
 
-class Data:
+class Data:		# Helpful class to gather all sentences of a file
 
 	def __init__(self, sentences):
 		self.sentences = sentences
 
-	def evaluate(self):
-		correct, total, sentence_count = 0, 0, 0
+	def evaluate(self):		# UAS function; named evaluate for possible expansion with LAS
+		correct, total, sentence_count = 0, 0, 0		# Init counts to 0
 		for sentence in self.sentences:
 			for token in sentence.tokens:
 				total += 1
-				if token.id == '0':
+				if token.id == '0':		# Skip root as a dependant
 					continue
 				else:
-					predicted_head = token.x
-					gold_head = token.head
-					#total += 1
-					if predicted_head == gold_head:
+					predicted_head = token.x		# Store predicted head in one of the empty columns
+					gold_head = token.head		# Get gold head of current token
+					if predicted_head == gold_head:		# If correct, update count
 						correct += 1
 			sentence_count += 1
-			#print(sentence_count, correct, total)
-		uas = correct/total
+		uas = correct/total		# Simple UAS with print statement
 		print("UAS score on", total, "tokens over", sentence_count, "sentences:", uas)
 		return uas
 
 class Reader:
+
+	'''
+		Use the Reader object to read files as lists of Sentence objects.
+	'''
 	
 	def __init__(self, filepath):
-		self.filepath = filepath
+		self.filepath = filepath	# Given the source filepath of the file
 	
-	def read_file(self):
+	def read_file(self):		# Read file with given filepath
 		f = open(self.filepath)
-		sentences = []
+		sentences = []		# Init list of sentences
 	
-		# init token_items
+		# Init token_items; information for each token
 		token_items = []
 	
 		for line in f:
-			# init current sentence and token
+			# Init current sentence and token
 			token = Token()
 		
-			# if not at end of sentence
+			# If not at end of sentence
 			if line != '\n':
 				items = line.split('\t')
-				#print(items)
 			
-				# add token data
+				# Add token data
 				token.id = items[0]
 				token.form = items[1]
 				token.lemma = items[2]
@@ -117,31 +119,35 @@ class Reader:
 				token.x = items[8]
 				token.y = items[9]
 			
-				# add Token to Sentence
+				# Add Token to Sentence
 				token_items.append(token)
 		
-			# add sentence and reset token_items
+			# Add sentence and reset token_items
 			else:
 				sentences.append(Sentence(token_items))
 				token_items = []
 				
-		f.close()
+		f.close()		# Just to be safe
 		return sentences
 
 class Writer:
+
+	'''
+		Use the Writer object to write a list of sentences back into .CONLL06 format
+	'''
 	
-	def __init__(self, filepath, sentences):
+	def __init__(self, filepath, sentences):		# filepath here is the target for writing the file
 		self.filepath = filepath
 		self.sentences = sentences
 		
 	def write_file(self):
-		target_filename = self.filepath.split('/')[-1]
-		with open(target_filename+'.pred', 'w') as f:
+		target_filename = self.filepath.split('/')[-1]		# Remove potential tag ie. [.blind, .gold]
+		with open(target_filename+'.pred', 'w') as f:		# Add .pred tag
 			for sentence in self.sentences:
 				for token in sentence.tokens:
-					if token.form == 'ROOT':
+					if token.form == 'ROOT':		# Don't write the ROOT token
 						continue
-					else:
+					else:		# Include every other token with all information
 						line = ""
 						line+=token.id+'\t'
 						line+=token.form+'\t'
@@ -154,6 +160,6 @@ class Writer:
 						line+=token.x+'\t'
 						line+=token.y
 					
-						f.write(str(line))
-				f.write('\n')
-			f.close()
+						f.write(str(line))		# Write token line
+				f.write('\n')		# Newline
+			f.close()		# Insurance

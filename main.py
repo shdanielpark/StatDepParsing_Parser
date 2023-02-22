@@ -30,4 +30,11 @@ def test_model(arguments):
 		stream.close()
 		dep_parser.make_predictions(testing_data.sentences)
 
-parser = argparse.ArgumentParser()
+
+''' argparse code learned from documentation '''
+''' https://docs.python.org/3/library/argparse.html '''
+
+parser = argparse.ArgumentParser(description='Train and make predictions with a dependency parser.')
+parser.add_argument('action', choices=['train', 'test'], help='Train or test the parser.')
+parser.add_argument('language', choices=['en', 'de'], help='English (-en) or German (-de)?')
+parser.add_argument('')
