@@ -1,3 +1,5 @@
+import timeit
+
 class FeatureMapping:
 	
 	'''
@@ -114,6 +116,8 @@ class FeatureMapping:
 			Creates feature mapping for all sentences and arcs of self.sentences
 		'''
 		sentence_count = 0
+		starttime = timeit.default_timer()
+		print("Start time: " + str(starttime))
 		for sentence in self.sentences:
 			sentence_count += 1
 			arcs = sentence.potential_arcs()
@@ -132,6 +136,9 @@ class FeatureMapping:
 		feature_vectors = []
 		
 		for feature in self.create_features(sentence, arc):
-			feature_vectors.append(self.map[feature])
+			if feature in self.map.keys():
+				feature_vectors.append(self.map[feature])
+			else:
+				continue
 
 		return feature_vectors

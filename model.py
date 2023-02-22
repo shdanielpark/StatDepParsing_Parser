@@ -40,7 +40,7 @@ class Model:
 					sentence_count = 1
 					for sentence in self.data.sentences:
 							arc_scores = self.edge_scores(sentence)
-							predicted = decoder.parse(arc_scores); gold = sentence.gold_arcs()
+							predicted = decoder.decode(arc_scores); gold = sentence.gold_arcs()
 							#print(predicted)
 							#print("")
 							#print(gold)
@@ -76,11 +76,12 @@ class Model:
 					print("")
 
 
-	def make_predictions(self):
+	def make_predictions(self, data):
 			decoder = Eisner()
-			for sentence in self.sentences:
+			for sentence in data.sentences:
 					arc_scores = self.edge_scores(sentence)
-					predicted = decoder.parse(arc_scores)
-					for arc in predicted:
-							dep = arc[1]; predicted_head = arc[0]
-							sentence.tokens[dep].head = predicted_head
+					predicted = decoder.decode(arc_scores)
+					for token in sentence.tokens[1:]:
+							dep = token.id
+							predicted_head = predicted[dep]
+							sentence.tokens[int(dep)].x = predicted_head
