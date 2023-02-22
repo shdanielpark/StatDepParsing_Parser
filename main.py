@@ -14,7 +14,7 @@ def train_model(arguments):
 		feature_map.create_map()
 		feature_map.frozen=True
 
-		dep_parser = Model(training_data.sentences, feature_map)
+		dep_parser = Model(training_data, feature_map)
 		dep_parser.train(arguments.num_epochs)
 
 		stream = gzip.open(outfile, 'wb')

@@ -69,14 +69,17 @@ class Data:
 		correct, total, sentence_count = 0, 0, 0
 		for sentence in self.sentences:
 			for token in sentence.tokens:
+				total += 1
 				if token.id == '0':
 					continue
 				else:
-					predicted_head = token.head[1]
-					gold_head = token.head[0]
-					total += 1
+					predicted_head = token.x
+					gold_head = token.head
+					#total += 1
 					if predicted_head == gold_head:
 						correct += 1
+			sentence_count += 1
+			#print(sentence_count, correct, total)
 		uas = correct/total
 		print("UAS score on", total, "tokens over", sentence_count, "sentences:", uas)
 		return uas
