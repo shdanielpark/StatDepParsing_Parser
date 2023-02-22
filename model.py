@@ -2,14 +2,14 @@ import numpy as np
 import timeit
 import random
 
-from reader import Reader, Sentence, Token
+from IO import Reader, Writer, Data, Sentence, Token
 from feature import FeatureMapping
 from eisner import Eisner
 
 class Model:
 
-	def __init__(self, sentences, feature_mapping):
-		self.sentences = sentences
+	def __init__(self, data, feature_mapping):
+		self.data = data
 		self.feature_mapping = feature_mapping
 		self.weight_vector = np.zeros(len(self.feature_mapping.map), dtype=np.float32)
 
@@ -31,15 +31,12 @@ class Model:
 	def train(self, epochs):
 			decoder = Eisner()
 			for i in np.arange(epochs):
-					random.shuffle(self.sentences)
+					random.shuffle(self.data.sentences)
 
 					starttime = timeit.default_timer()
 					print("Start time: " + str(starttime))
 					print("Epoch: " + str(i+1))
 
-					correct_arcs = 0; total_arcs = 0
-
-					sentence_count = 1
 					for sentence in self.sentences:
 							arc_scores = self.edge_scores(sentence)
 							predicted = decoder.parse(arc_scores); gold = sentence.gold_arcs()
@@ -60,6 +57,7 @@ class Model:
 									#print("")
 									#print("Predicted: " + (str(predicted_arc)))
 									#print("Gold: " + str(gold_arc))
+
 									if predicted_arc[0] != gold_arc[0]:
 											predicted_arc_vector_indices = self.feature_mapping.extract_features(sentence, predicted_arc)
 											gold_arc_vector_indices = self.feature_mapping.extract_features(sentence, gold_arc)
@@ -73,9 +71,8 @@ class Model:
 									#print("Sentence:", sentence_count)
 									print("Time taken for past", sentence_count, "sentences:", (timeit.default_timer() - starttime))
 											
-					UAS = correct_arcs / total_arcs
-					print("UAS: " + str(UAS))
 					print("Time taken for epoch:", (timeit.default_timer() - starttime))
+
 
 	def make_predictions(self):
 			decoder = Eisner()
