@@ -84,12 +84,13 @@ class Model:
 					Function that makes predictions with the current parser on given data.
 					Used during validation and testing.
 					Similar process to training, except no feature_map population nor updating weights.
+					Populates one of the empty columns with the predicted_head.
 			'''
 			decoder = Eisner()
 			for sentence in data.sentences:
-					arc_scores = self.edge_scores(sentence)
-					predicted = decoder.decode(arc_scores)
+					arc_scores = self.edge_scores(sentence)		# Calculate arc scores
+					predicted = decoder.decode(arc_scores)		# Predict best tree
 					for token in sentence.tokens[1:]:
 							dep = token.id
-							predicted_head = predicted[dep]
-							sentence.tokens[int(dep)].x = predicted_head
+							predicted_head = predicted[dep]		# Get predicted head from dictionary.
+							sentence.tokens[int(dep)].x = predicted_head		# Populate Token.x with predicted head

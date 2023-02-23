@@ -138,7 +138,8 @@ class FeatureMapping:
 			for arc in arcs:
 				# Iterate through full feature values for current sentence-arc
 				for feature in self.create_features(sentence, arc):
-					if feature not in self.map.keys() and self.frozen == False:    # If full_feature not in map
+					# If full_feature not in map and still populating (ie. self.frozen == False)
+					if feature not in self.map.keys() and self.frozen == False:
 						self.map[feature] = self.vector_id
 						self.vector_id += 1
 			if sentence_count % 1000 == 0:

@@ -141,7 +141,7 @@ class Writer:
 		self.sentences = sentences
 		
 	def write_file(self):
-		target_filename = self.filepath.split('/')[-1]		# Remove potential tag ie. [.blind, .gold]
+		target_filename = self.filepath.split('/')[-1].rsplit('.', 1)[0]		# Remove potential tag ie. [.blind, .gold]
 		with open(target_filename+'.pred', 'w') as f:		# Add .pred tag
 			for sentence in self.sentences:
 				for token in sentence.tokens:
